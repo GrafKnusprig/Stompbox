@@ -12,8 +12,6 @@ namespace StompboxRemoteIot
     {
         static void Main(string[] args)
         {
-            SkiaLayout.DefaultTextureNamespace = "StompboxRemoteIot";
-
             RemoteClient client = new RemoteClient();
 
             //client.MidiCallback = SendMidiCommand;

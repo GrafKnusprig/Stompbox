@@ -4,7 +4,7 @@
 #include "Gain.h"
 #include "GuitarConvolver.h"
 #include "ToneStack.h"
-#include "PitchDetector.h"
+#include "FastPitchDetector.h"
 #include "AudioFilePlayer.h"
 #include "AudioFileRecorder.h"
 #include "NAM.h"
@@ -297,7 +297,7 @@ StompBox* CreateMultiGatePlugin(PluginFactory& factory)
 
 StompBox* CreateTunerPlugin(PluginFactory& factory)
 {
-	PitchDetector* tuner = new PitchDetector(4096);
+	FastPitchDetector* tuner = new FastPitchDetector();
 
 	tuner->IsUserSelectable = false;
 	tuner->Enabled = false;

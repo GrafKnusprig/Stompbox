@@ -42,6 +42,12 @@ namespace Stompbox
         int frameCount = 0;
         DateTime startTime = DateTime.MinValue;
 
+        // Confidence stability tracking
+        const float MIN_CONFIDENCE = 0.8f;  // Require 80% confidence
+        const int STABLE_FRAMES = 10;       // Must be stable for 10 frames (~333ms at 30Hz)
+        int stableConfidenceFrames = 0;
+        bool graphVisible = false;
+
         TargetNote[] targetNotes;
 
         HorizontalStack noteDisplay;
@@ -102,6 +108,10 @@ namespace Stompbox
                 tunerFrequencyDisplay.StringBuilder.Clear();
                 tunerCentsDisplay.StringBuilder.Clear();
                 tunerNoteDisplay.StringBuilder.Clear();
+                
+                // Reset confidence tracking
+                stableConfidenceFrames = 0;
+                graphVisible = false;
             }
         }
 
@@ -175,6 +185,7 @@ namespace Stompbox
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Stretch,
+                DesiredWidth = 120,
                 BackgroundColor = UIColor.Black,
                 Child = tunerNoteDisplay
             });
@@ -297,45 +308,72 @@ namespace Stompbox
                 tunerNoteDisplay.StringBuilder.Append(noteNames[(int)closestNote.Note]);
 
                 lastClosestNote = (int)closestNote.Note;
+                
+                // Reset stability tracking when note changes
+                stableConfidenceFrames = 0;
+                graphVisible = false;
             }
 
             float closestY = (tunerImageHeight / 2) - 1;
 
-            float step = (float)tunerImageWidth / (float)(queueSize - 1);
+		// Track confidence stability - only show graph when confidence is high AND stable
+		float confidence = Plugin.GetParameter("Confidence")?.Value ?? 0f;
+		
+		if (confidence >= MIN_CONFIDENCE)
+		{
+			// Confidence is high - increment stable counter
+			stableConfidenceFrames++;
+			if (stableConfidenceFrames >= STABLE_FRAMES)
+			{
+				graphVisible = true;
+			}
+		}
+		else
+		{
+			// Confidence dropped - reset counter and hide graph
+			stableConfidenceFrames = 0;
+			graphVisible = false;
+		}
 
-            float offset = (step / 2);
+		if (graphVisible)
+		{
+			float step = (float)tunerImageWidth / (float)(queueSize - 1);
+			float offset = (step / 2);
 
-            int lastX = -1;
-            int lastY = -1;
+			int lastX = -1;
+			int lastY = -1;
 
-            foreach (float pitch in pitchHistory)
-            {
-                if (pitch > 0)
-                {
-                    float semitoneOffset = (float)(12 * Math.Log(pitch / currentPitchCenter, 2));
+			foreach (float pitch in pitchHistory)
+			{
+				if (pitch > 0)
+				{
+					float semitoneOffset = (float)(12 * Math.Log(pitch / currentPitchCenter, 2));
 
-                    float y = ((float)tunerImageHeight / 2) + (-semitoneOffset  * (float)tunerImageHeight);
+					float y = ((float)tunerImageHeight / 2) + (-semitoneOffset  * (float)tunerImageHeight);
 
-                    float xOffset = offset;
-                    float yOffset = y;
+					float xOffset = offset;
+					float yOffset = y;
 
-                    if ((yOffset > 0) && (yOffset < tunerImageHeight))
-                    {
-                        if (lastX != -1)
-                        {
-                            tunerImage.DrawLine(new Vector2(lastX, lastY), new Vector2((int)xOffset, (int)yOffset), tunerPointDrawAction);
-                        }
+					if ((yOffset > 0) && (yOffset < tunerImageHeight))
+					{
+						if (lastX != -1)
+						{
+							tunerImage.DrawLine(new Vector2(lastX, lastY), new Vector2((int)xOffset, (int)yOffset), tunerPointDrawAction);
+						}
 
-                        lastX = (int)xOffset;
-                        lastY = (int)yOffset;
-                    }
-                }
+						lastX = (int)xOffset;
+						lastY = (int)yOffset;
+					}
+				}
 
-                offset += step;
-            }
+				offset += step;
+			}
+		}
 
-            tunerImage.DrawLine(new Vector2(0, (int)closestY), new Vector2(tunerImage.ImageWidth - 1, (int)closestY), lineDrawAction);
-
+		// Always draw the center line (indicates perfect pitch)
+		int centerY = tunerImageHeight / 2;
+		tunerImage.DrawLine(new Vector2(0, centerY), new Vector2(tunerImageWidth - 1, centerY), lineDrawAction);
+		
             tunerImage.UpdateImageData();
 
             noteDisplay.UpdateContentLayout();

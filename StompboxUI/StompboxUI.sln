@@ -27,8 +27,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame.WindowsDX
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StompboxAndroid", "StompboxAndroid\StompboxAndroid.csproj", "{1FF3B5C3-44E2-464A-A15F-55AD4B41CEA0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stompbox", "..\build\stompbox\stompbox.vcxproj", "{AFF0B0F7-7704-3EF3-9971-EC4A425B14D0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stompbox-capi", "..\build\stompbox-capi\stompbox-capi.vcxproj", "{4385DBD8-F7F9-37BA-990B-A5D5569733A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StompboxClient", "StompboxClient", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
