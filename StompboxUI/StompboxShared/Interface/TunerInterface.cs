@@ -141,7 +141,7 @@ namespace Stompbox
 
             tunerImageElement = new ImageElement(tunerImage.Image)
             {
-                DesiredWidth = 400,
+                DesiredWidth = 456,
                 DesiredHeight = 200
             };
             tunerImageElement.Image = tunerImage.Image;
